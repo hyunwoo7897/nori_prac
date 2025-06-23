@@ -124,6 +124,8 @@ class Camera;
 class ImageBlock;
 class Integrator;
 class KDTree;
+
+
 class Emitter;
 struct EmitterQueryRecord;
 class Mesh;
@@ -150,6 +152,7 @@ public:
     template <typename... Args> NoriException(const char *fmt, const Args &... args) 
      : std::runtime_error(tfm::format(fmt, args...)) { }
 };
+
 
 /// Return the number of cores (real and virtual)
 extern int getCoreCount();
