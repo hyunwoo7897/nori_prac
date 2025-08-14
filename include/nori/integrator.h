@@ -19,6 +19,8 @@
 #pragma once
 
 #include <nori/object.h>
+#include <nori/bbox.h>
+#include <nori/scene.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -37,9 +39,12 @@ public:
     virtual ~Integrator() { }
 
     /// Perform an (optional) preprocess step
-    virtual void preprocess(const Scene *scene) { }
+    virtual void preprocess(const Scene *scene) { 
+        
+    }
 
-    /**
+    /*
+    *
      * \brief Sample the incident radiance along a ray
      *
      * \param scene
@@ -58,6 +63,8 @@ public:
      * provided by this instance
      * */
     EClassType getClassType() const { return EIntegrator; }
+
+
 };
 
 NORI_NAMESPACE_END

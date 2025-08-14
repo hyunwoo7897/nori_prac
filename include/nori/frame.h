@@ -142,6 +142,8 @@ struct Frame {
                 "  n = %s\n"
                 "]", s.toString(), t.toString(), n.toString());
     }
+
+    
 };
 
 NORI_NAMESPACE_END

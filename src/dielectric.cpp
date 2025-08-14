@@ -18,6 +18,8 @@
 
 #include <nori/bsdf.h>
 #include <nori/frame.h>
+#include <nori/common.h>
+
 
 NORI_NAMESPACE_BEGIN
 
@@ -32,6 +34,8 @@ public:
         m_extIOR = propList.getFloat("extIOR", 1.000277f);
     }
 
+
+
     Color3f eval(const BSDFQueryRecord &) const {
         /* Discrete BRDFs always evaluate to zero in Nori */
         return Color3f(0.0f);
@@ -42,9 +46,44 @@ public:
         return 0.0f;
     }
 
+   
     Color3f sample(BSDFQueryRecord &bRec, const Point2f &sample) const {
-        throw NoriException("Unimplemented!");
+        float cosThetaI = Frame::cosTheta(bRec.wi);
+        float fr = fresnel(cosThetaI, m_extIOR, m_intIOR);
+
+        bool entering = cosThetaI > 0;
+        float etaI = entering ? m_extIOR : m_intIOR;
+        float etaT = entering ? m_intIOR : m_extIOR;
+        float eta = etaI / etaT;
+
+        if ( sample.x() >= fr) {
+            float k = 1.0f - eta * eta * (1.0f - cosThetaI * cosThetaI); // Snell's law 계산
+
+            bRec.wo = Vector3f(-eta * bRec.wi.x(), -eta * bRec.wi.y(), -std::sqrt(k));
+            if (!entering) {
+                bRec.wo[2] = -bRec.wo.z(); // 굴절 벡터의 z 성분을 반전
+            }
+
+        } else {
+            bRec.wo = Vector3f(
+                -bRec.wi.x(),
+                -bRec.wi.y(),
+                bRec.wi.z()
+            );
+            bRec.measure = EDiscrete;
+
+            bRec.eta = 1.0f;
+
+            return Color3f(1.0f);
+        }
+
+        bRec.measure = EDiscrete;
+        bRec.eta = 1.0f / eta;
+
+        return Color3f(1.0f / (eta * eta));
     }
+    
+
 
     std::string toString() const {
         return tfm::format(
@@ -54,6 +93,10 @@ public:
             "]",
             m_intIOR, m_extIOR);
     }
+
+    bool isSpecular() const {
+        return true;
+    }   
 private:
     float m_intIOR, m_extIOR;
 };

@@ -284,7 +284,7 @@ float fresnel(float cosThetaI, float extIOR, float intIOR) {
     /* Using Snell's law, calculate the squared sine of the
        angle between the normal and the transmitted ray */
     float eta = etaI / etaT,
-          sinThetaTSqr = eta*eta * (1-cosThetaI*cosThetaI);
+          sinThetaTSqr = eta * eta * (1-cosThetaI*cosThetaI);
 
     if (sinThetaTSqr > 1.0f)
         return 1.0f;  /* Total internal reflection! */

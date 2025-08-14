@@ -54,6 +54,10 @@ public:
         return Color3f(1.0f);
     }
 
+    bool isSpecular() const {
+        return true;
+    }
+
     std::string toString() const {
         return "Mirror[]";
     }

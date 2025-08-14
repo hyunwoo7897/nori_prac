@@ -19,6 +19,7 @@
 #pragma once
 
 #include <nori/object.h>
+#include <nori/mesh.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -39,6 +40,8 @@ struct BSDFQueryRecord {
     /// Measure associated with the sample
     EMeasure measure;
 
+    Intersection* its = nullptr;
+
     /// Create a new record for sampling the BSDF
     BSDFQueryRecord(const Vector3f &wi)
         : wi(wi), eta(1.f), measure(EUnknownMeasure) { }
@@ -47,6 +50,10 @@ struct BSDFQueryRecord {
     BSDFQueryRecord(const Vector3f &wi,
             const Vector3f &wo, EMeasure measure)
         : wi(wi), wo(wo), eta(1.f), measure(measure) { }
+    /// Create a new record for querying the BSDF with an intersection
+    BSDFQueryRecord(const Vector3f &wi,
+            const Vector3f &wo, EMeasure measure, Intersection* its)
+        : wi(wi), wo(wo), eta(1.f), measure(measure), its(its) { }
 };
 
 /**
@@ -110,6 +117,8 @@ public:
      * or not to store photons on a surface
      */
     virtual bool isDiffuse() const { return false; }
+    virtual bool isEmitter() const { return false; }
+    virtual bool isSpecular() const { return false; }
 };
 
 NORI_NAMESPACE_END

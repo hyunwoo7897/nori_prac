@@ -89,6 +89,11 @@ add_executable(nori
   src/mirror.cpp
   src/dielectric.cpp
   src/normals.cpp
+  src/area.cpp
+  src/whitted.cpp
+  src/path_mats.cpp
+  src/path_ems.cpp
+  src/path_mis.cpp
 )
 
 add_definitions(${NANOGUI_EXTRA_DEFS})

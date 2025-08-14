@@ -15,11 +15,10 @@
     You should have received a copy of the GNU General Public License
     along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
-
+#include <nori/block.h>
 #include <nori/parser.h>
 #include <nori/scene.h>
-#include <nori/camera.h>
-#include <nori/block.h>
+#include <nori/camera.h>  
 #include <nori/timer.h>
 #include <nori/bitmap.h>
 #include <nori/sampler.h>

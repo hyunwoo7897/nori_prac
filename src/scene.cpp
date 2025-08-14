@@ -31,28 +31,43 @@ Scene::Scene(const PropertyList &) {
 
 Scene::~Scene() {
     delete m_accel;
-    delete m_sampler;
     delete m_camera;
     delete m_integrator;
+    delete m_sampler;
 }
 
 void Scene::activate() {
-    m_accel->build();
+    try {
+        m_accel->build();
 
-    if (!m_integrator)
-        throw NoriException("No integrator was specified!");
-    if (!m_camera)
-        throw NoriException("No camera was specified!");
-    
-    if (!m_sampler) {
-        /* Create a default (independent) sampler */
-        m_sampler = static_cast<Sampler*>(
-            NoriObjectFactory::createInstance("independent", PropertyList()));
+        if (!m_integrator)
+            throw NoriException("No integrator was specified!");
+        if (!m_camera)
+            throw NoriException("No camera was specified!");
+        
+        if (!m_sampler) {
+            /* Create a default (independent) sampler */
+            m_sampler = static_cast<Sampler*>(
+                NoriObjectFactory::createInstance("independent", PropertyList()));
+        }
+        for (uint32_t i=0; i<this->getMeshes().size(); i++) {
+            if (this->getMeshes()[i]->isEmitter()){
+                Emitter* emitter = this->getMeshes()[i]->getEmitter();
+                if (emitter){
+                    m_emitters.push_back(emitter);
+                    cout << "Emitter added: " << emitter->toString() << endl;
+                }
+                    
+            }
+        }
+
+        cout << endl;
+        cout << "Configuration: " << toString() << "hi" << endl;
+        cout << endl;
+    } catch (const std::exception& e) {
+        std::cerr << "[Scene::activate] Exception: " << e.what() << std::endl;
+        throw; // 필요시 재throw, 아니면 생략
     }
-
-    cout << endl;
-    cout << "Configuration: " << toString() << endl;
-    cout << endl;
 }
 
 void Scene::addChild(NoriObject *obj) {
@@ -65,9 +80,9 @@ void Scene::addChild(NoriObject *obj) {
             break;
         
         case EEmitter: {
-                //Emitter *emitter = static_cast<Emitter *>(obj);
+                Emitter *emitter = static_cast<Emitter *>(obj);
                 /* TBD */
-                throw NoriException("Scene::addChild(): You need to implement this for emitters");
+                m_emitters.push_back(emitter);
             }
             break;
 
@@ -104,18 +119,36 @@ std::string Scene::toString() const {
         meshes += "\n";
     }
 
+    std::string emitters;
+    for (size_t i=0; i<m_emitters.size(); ++i) {
+        if (m_emitters[i])
+            emitters += std::string("  ") + indent(m_emitters[i]->toString(), 2);
+        else
+            emitters += std::string("  null");
+        if (i + 1 < m_emitters.size())
+            emitters += ",";
+        emitters += "\n";
+    }
+
     return tfm::format(
         "Scene[\n"
         "  integrator = %s,\n"
         "  sampler = %s\n"
         "  camera = %s,\n"
         "  meshes = {\n"
+        "  %s  },\n"
+        "  emitters = {\n"
         "  %s  }\n"
         "]",
         indent(m_integrator->toString()),
         indent(m_sampler->toString()),
         indent(m_camera->toString()),
-        indent(meshes, 2)
+        indent(meshes, 2),
+        
+        
+        
+        
+        indent(emitters, 2)
     );
 }
 

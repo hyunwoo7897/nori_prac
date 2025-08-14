@@ -23,6 +23,7 @@
 #include <nori/warp.h>
 #include <Eigen/Geometry>
 
+
 NORI_NAMESPACE_BEGIN
 
 Mesh::Mesh() { }
@@ -33,11 +34,22 @@ Mesh::~Mesh() {
 }
 
 void Mesh::activate() {
+    computeBoundingBox(); 
     if (!m_bsdf) {
         /* If no material was assigned, instantiate a diffuse BRDF */
         m_bsdf = static_cast<BSDF *>(
             NoriObjectFactory::createInstance("diffuse", PropertyList()));
     }
+    if(m_emitter) {
+        if(m_emitter->isConnectMesh()) {
+            m_emitter->setConnectMesh(this);
+        }
+    }
+    m_dpdf.clear();
+    for(uint32_t i = 0; i < getTriangleCount(); ++i) {
+        m_dpdf.append(surfaceArea(i));
+    }
+    m_dpdf.normalize();
 }
 
 float Mesh::surfaceArea(uint32_t index) const {
@@ -163,5 +175,35 @@ std::string Intersection::toString() const {
         mesh ? mesh->toString() : std::string("null")
     );
 }
+
+float Mesh::samplePosition( const Point2f &sample, Point3f &p, Normal3f &n ) const {
+
+    float xi = sample.x();
+    float yi = sample.y();
+
+    size_t sampleIndex = m_dpdf.sampleReuse(xi);
+
+    float alpha = 1.0f - std::sqrt(1.0f - xi);
+    float beta = yi * std::sqrt(1.0f - xi);
+    float gamma = 1.0f - alpha - beta;
+
+    Point3f v0 = m_V.col(m_F(0, sampleIndex));
+    Point3f v1 = m_V.col(m_F(1, sampleIndex));
+    Point3f v2 = m_V.col(m_F(2, sampleIndex));
+    p = alpha * v0 + beta * v1 + gamma * v2;
+
+    if(m_N.size() > 0){
+        n = (alpha * m_N.col(m_F(0, sampleIndex)) +
+            beta * m_N.col(m_F(1, sampleIndex)) +
+            gamma * m_N.col(m_F(2, sampleIndex))).normalized();
+    }else {
+        n = ((v1 - v0).cross(v2 - v0)).normalized();
+    }
+
+
+    float pdf = 1.0f / m_dpdf.getSum();
+    return pdf;
+}
+
 
 NORI_NAMESPACE_END

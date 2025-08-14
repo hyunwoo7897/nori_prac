@@ -21,7 +21,7 @@
 #include <nori/object.h>
 #include <nori/frame.h>
 #include <nori/bbox.h>
-
+#include <nori/dpdf.h>
 NORI_NAMESPACE_BEGIN
 
 /**
@@ -62,6 +62,7 @@ struct Intersection {
     /// Return a human-readable summary of the intersection record
     std::string toString() const;
 };
+
 
 /**
  * \brief Triangle mesh
@@ -145,6 +146,8 @@ public:
     /// Return a pointer to an attached area emitter instance (const version)
     const Emitter *getEmitter() const { return m_emitter; }
 
+    
+
     /// Return a pointer to the BSDF associated with this mesh
     const BSDF *getBSDF() const { return m_bsdf; }
 
@@ -163,6 +166,23 @@ public:
      * */
     EClassType getClassType() const { return EMesh; }
 
+
+    void computeBoundingBox()  {
+        BoundingBox3f bbox;
+        bbox.reset();
+        for (int i = 0; i < m_V.cols(); ++i) {
+            bbox.expandBy(m_V.col(i));
+        }
+        m_bbox = bbox;
+    }
+    float getSurfaceArea() const {
+        float area = 0.0f;
+        for (uint32_t i = 0; i < getTriangleCount(); ++i)
+            area += surfaceArea(i);
+        return area;
+    }
+
+    float samplePosition ( const Point2f &sample, Point3f &p, Normal3f &n ) const ;
 protected:
     /// Create an empty mesh
     Mesh();
@@ -174,8 +194,13 @@ protected:
     MatrixXf      m_UV;                  ///< Vertex texture coordinates
     MatrixXu      m_F;                   ///< Faces
     BSDF         *m_bsdf = nullptr;      ///< BSDF of the surface
-    Emitter    *m_emitter = nullptr;     ///< Associated emitter, if any
+    Emitter      *m_emitter = nullptr;     ///< Associated emitter, if any
     BoundingBox3f m_bbox;                ///< Bounding box of the mesh
+
+
+
+    DiscretePDF   m_dpdf;
+
 };
 
 NORI_NAMESPACE_END

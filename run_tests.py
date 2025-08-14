@@ -32,13 +32,13 @@ TEST_WARPS = [
 
 def find_build_directory():
     root = os.path.join(".")
-    if os.path.isfile(os.path.join(root, "nori")):
+    exe_suffix = ".exe" if os.name == "nt" else ""
+    if os.path.isfile(os.path.join(root, "nori" + exe_suffix)):
         return root
     root = os.path.dirname(root)
-    if os.path.isfile(os.path.join(root, "nori")):
+    if os.path.isfile(os.path.join(root, "nori" + exe_suffix)):
         return root
     return os.path.join(root, "build")
-
 
 def test_warps_and_scenes(scenes, warps):
     total = len(scenes) + len(warps)
@@ -46,16 +46,18 @@ def test_warps_and_scenes(scenes, warps):
     failed = []
     build_dir = find_build_directory()
 
+    exe_suffix = ".exe" if os.name == "nt" else ""
+
     for t in scenes:
         path = os.path.join("scenes", t)
-        ret = subprocess.call([os.path.join(build_dir, "nori"), path])
+        ret = subprocess.call([os.path.join(build_dir, "nori" + exe_suffix), path])
         if ret == 0:
             passed += 1
         else:
             failed.append(t)
 
     for (warp_type, param) in warps:
-        args = [os.path.join(build_dir, "warptest"), warp_type]
+        args = [os.path.join(build_dir, "warptest" + exe_suffix), warp_type]
         if param is not None:
             if not isinstance(param, (list, tuple)):
                 param = [param]

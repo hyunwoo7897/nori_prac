@@ -58,6 +58,10 @@ public:
     /// Return a reference to an array containing all meshes
     const std::vector<Mesh *> &getMeshes() const { return m_meshes; }
 
+    const std::vector<Emitter *> &getEmitters() const {
+        return m_emitters;
+    }
+
     /**
      * \brief Intersect a ray against all triangles stored in the scene
      * and return detailed intersection information
@@ -122,6 +126,8 @@ private:
     Sampler *m_sampler = nullptr;
     Camera *m_camera = nullptr;
     Accel *m_accel = nullptr;
+
+    std::vector<Emitter *> m_emitters; ///< List of all emitters in the scene
 };
 
 NORI_NAMESPACE_END
